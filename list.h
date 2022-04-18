@@ -27,6 +27,10 @@ protected:
 };
 
 template <typename List_entry>
+Error_code copy(List<List_entry> &dest, const List<List_entry> &source);
+
+
+template <typename List_entry>
 List<List_entry>::List()
 /* 
  

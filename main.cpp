@@ -24,12 +24,8 @@ int main()
         }
 
         else if (target >= 3 && target <= 5) {
-            std::cout << "Enter number for searching: ";
-            std::cin >> key;
-            checkInt(key);
-            std::cout << "\n";
             for (int i = 0; i < size; i++) {
-                theList.insert(i, rand.random_integer(1, 100));
+                theList.insert(i, rand.random_integer(1, 10000));
             }
         }
 
@@ -48,7 +44,7 @@ int main()
                 selection_sort(theList, size);
                 break;
             case 5:
-                std::cout << "placeholder 5\n";
+                performance_test(theList);
                 break;
             case 6:
                 std::cout << "Ending program, thank you for using!\n";

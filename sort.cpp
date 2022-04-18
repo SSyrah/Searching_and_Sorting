@@ -54,7 +54,7 @@ void initialize(int& target) {
               << "[2] Sequential search vs Binary Search comparison \n"
               << "[3] Insertion sort algorithm \n"
               << "[4] Selection sort algorithm \n"
-              << "[5] ---- \n"
+              << "[5] Performance test with 3 sorting algorithms \n"
               << "[6] Quit program \n"
               << "Your option: ";
     std::cin >> target;

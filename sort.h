@@ -20,9 +20,12 @@ public:
     Error_code binary_search_1 (const SortableList<Record> &the_list, const Key &target, int &position);
     Error_code insertion_sort(SortableList<Record>&);
     Error_code selectionSort(SortableList<Record>&);
+    void quick_sort(SortableList<Record>&);
 private:
     int max_key(SortableList<Record>& ,int, int);
     void swap(SortableList<Record>& , int low, int high);
+    void recursive_quick_sort(SortableList<Record>&, int low, int high);
+    int partition(SortableList<Record>&, int low, int high);
 
 };
 
@@ -47,11 +50,19 @@ template<typename Record>
 void insertion_sort(SortableList<Record>& sList, int size);
 template<typename Record>
 void selection_sort(SortableList<Record>& sList, int size);
+template<typename Record>
+void performance_test(SortableList<Record>& sList);
 
 
 
 //------------METHODS--------------------//
 
+template<typename Record>
+int SortableList<Record>::getComparisons() const {
+    return Key::comparisons;
+}
+
+//---Sequential Search---------------------
 template<typename Record>
 Error_code SortableList<Record>::sequential_search(const List<Record> &the_list, const Key &target, int &dest)
 /*
@@ -71,11 +82,7 @@ Post: If an entry in the_list has key equal to target, then return
     return not_present;
 }
 
-template<typename Record>
-int SortableList<Record>::getComparisons() const {
-    return Key::comparisons;
-}
-
+//---Binary Search----------------------------
 template<typename Record>
 Error_code SortableList<Record>::binary_search_1(const SortableList<Record> &the_list,
                             const Key &target, int &position)
@@ -106,6 +113,7 @@ Uses: Methods for classes List and Record.
     }
 }
 
+//---Insertion sort----------------------
 template <class Record>
 Error_code SortableList<Record>::insertion_sort(SortableList<Record>& sList)
 /*
@@ -120,7 +128,7 @@ Uses: Methods for the class Record; the contiguous List implementation of
     Record current;        //  holds the entry temporarily removed from list
 
     for (first_unsorted = 1; first_unsorted < sList.count; first_unsorted++)
-        if (sList.entry[first_unsorted] < sList.entry[first_unsorted - 1]) {
+        if (operator< (sList.entry[first_unsorted] , sList.entry[first_unsorted - 1])) {
             position = first_unsorted;
             current = sList.entry[first_unsorted];         //  Pull unsorted entry out of the list.
             do {               //  Shift all entries until the proper position is found.
@@ -132,7 +140,7 @@ Uses: Methods for the class Record; the contiguous List implementation of
     return success;
 }
 
-
+//Selection sort methods-----------------
 template <typename Record>
 Error_code SortableList<Record>::selectionSort(SortableList<Record> &sList)
 /*
@@ -160,7 +168,7 @@ Uses: The class Record, the contiguous List implementation of Chapter 6.
     int largest, current;
     largest = low;
     for (current = low + 1; current <= high; current++)
-        if (sList.entry[largest] < sList.entry[current])
+        if (operator <(sList.entry[largest] , sList.entry[current]))
             largest = current;
     return largest;
 }
@@ -179,6 +187,91 @@ Uses: The contiguous List implementation of Chapter 6.
     sList.entry[low] = sList.entry[high];
     sList.entry[high] = temp;
 }
+//-------------------------------------------------
+
+//---Quick sort Methods:---------------------------
+template <typename Record>
+void SortableList<Record>::quick_sort(SortableList<Record>& sList)
+/*
+Post: The entries of the Sortable_list have been rearranged so
+      that their keys are sorted into nondecreasing order.
+Uses: The contiguous List implementation of Chapter 6, recursive_quick_sort.
+*/
+{
+    auto begin = std::chrono::steady_clock::now();
+    sList.recursive_quick_sort(sList,0, sList.count - 1);
+    auto end = std::chrono::steady_clock::now();
+    auto elapsed = end - begin;
+    Record temp;
+    /*
+    for (int i = 0; i < sList.size(); i++){
+        sList.retrieve(i, temp);
+        std::cout << temp << " ";
+    }*/
+    std::cout << "\nQuick sort completed\n";
+    std::cout << "Comparisons: " << sList.getComparisons() << std::endl;
+    std::cout << "Elapsed time: " << elapsed.count() << std::endl;
+    Key::comparisons = 0;
+}
+
+template <typename Record>
+void SortableList<Record>::recursive_quick_sort(SortableList<Record>& sList, int low, int high)
+/*
+Pre:  low and high are valid positions in the Sortable_list.
+Post: The entries of the Sortable_list have been
+      rearranged so that their keys are sorted into nondecreasing order.
+Uses: The contiguous List implementation of Chapter 6,
+      recursive_quick_sort, and partition.
+*/
+{
+    int pivot_position;
+    if (operator<(low ,high)) {   //   Otherwise, no sorting is needed.
+        pivot_position = partition(sList, low, high);
+        recursive_quick_sort(sList,low, pivot_position - 1);
+        recursive_quick_sort(sList,pivot_position + 1, high);
+    }
+}
+
+template <typename Record>
+int SortableList<Record>::partition(SortableList<Record>& sList, int low, int high)
+/*
+Pre:  low and high are valid positions of the Sortable_list, with low <= high.
+Post: The center (or left center) entry in the range between indices
+      low and high of the Sortable_list
+      has been chosen as a pivot.  All entries of the Sortable_list
+      between indices low and high, inclusive, have been
+      rearranged so that those with keys less than the pivot come
+      before the pivot and the remaining entries come
+      after the pivot.  The final position of the pivot is returned.
+Uses: swap(int i, int j) (interchanges entries in positions
+      i and j of a Sortable_list), the contiguous List implementation
+      of Chapter 6, and methods for the class Record.
+*/
+{
+    Record pivot;
+    int i,            //  used to scan through the list
+    last_small;   //  position of the last key less than pivot
+    swap(sList,low, (low + high) / 2);
+    pivot = sList.entry[low];   //  First entry is now pivot.
+    last_small = low;
+    for (i = low + 1; i <= high; i++)
+/*
+At the beginning of each iteration of this loop, we have the following
+conditions:
+        If low < j <= last_small then entry[j].key < pivot.
+        If last_small < j < i then entry[j].key >= pivot.
+*/
+        if (sList.entry[i] < pivot) {
+            last_small = last_small + 1;
+            swap(sList,last_small, i);  //  Move large entry to right and small to left.
+        }
+    swap(sList,low, last_small);      //  Put the pivot into its proper position.
+    return last_small;
+}
+
+
+
+
 
 
 // --------------FUNCTIONS------------------------//
@@ -240,9 +333,11 @@ void insertion_sort(SortableList<Record>& sList, int size)
 
     if (listSize < 0 || listSize <= sList.getMaxSize()) {
         std::cout << "\nLet's print first " << listSize << " numbers before sorting:\n";
+        /*
         for (int i = 0; i < size; i++) {
             sList.insert(i, rand.random_integer(1, 10000));
         }
+        */
         for (int i = 0; i < listSize; i++) {
             sList.retrieve(i, temp);
             std::cout << temp << " ";
@@ -276,9 +371,11 @@ void selection_sort(SortableList<Record>& sList, int size)
 
     if (listSize < 0 || listSize <= sList.getMaxSize()) {
         std::cout << "\nLet's print first " << listSize << " numbers before sorting:\n";
+        /*
         for (int i = 0; i < size; i++) {
             sList.insert(i, rand.random_integer(1, 10000));
         }
+        */
         for (int i = 0; i < listSize; i++) {
             sList.retrieve(i, temp);
             std::cout << temp << " ";
@@ -299,4 +396,29 @@ void selection_sort(SortableList<Record>& sList, int size)
     else{
         std::cout << "Entered list size is too low or too high\n";
     }
+}
+
+template<typename Record>
+void performance_test(SortableList<Record>& sList)
+{
+    SortableList<Record> templist, templist2;
+    copy(templist, sList);
+    copy(templist2,sList);
+    sList.quick_sort(sList);
+    auto begin = std::chrono::steady_clock::now();
+    templist.insertion_sort(templist);
+    auto end = std::chrono::steady_clock::now();
+    auto elapsed = end - begin;
+    std::cout << "\nInsertion sort completed.\n";
+    std::cout << "Comparisons: " << templist.getComparisons() << std::endl;
+    std::cout << "Elapsed time: " << elapsed.count() << std::endl;
+    Key::comparisons = 0;
+    auto begin2 = std::chrono::steady_clock::now();
+    templist2.selectionSort(templist2);
+    auto end2 = std::chrono::steady_clock::now();
+    auto elapsed2 = end - begin;
+    std::cout << "\nSelection sort completed.\n";
+    std::cout << "Comparisons: " << templist2.getComparisons() << std::endl;
+    std::cout << "Elapsed time: " << elapsed2.count() << "\n\n";
+    Key::comparisons = 0;
 }
