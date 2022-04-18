@@ -9,18 +9,30 @@ int main()
     int size{500};
 
     Random rand;
-    for (int i = 0; i < size; i++) {
-        theList.insert(i, rand.random_integer(1, 100));
-    }
 
     while (operand) {
         initialize(target);
-        if (target != 6 && target != 3) {
+
+        if (target == 1 || target == 2){
             std::cout << "Enter number for searching: ";
             std::cin >> key;
             checkInt(key);
             std::cout << "\n";
+            for (int i = 0; i < size; i++) {
+                theList.insert(i,i+2 );
+            }
         }
+
+        else if (target >= 3 && target <= 5) {
+            std::cout << "Enter number for searching: ";
+            std::cin >> key;
+            checkInt(key);
+            std::cout << "\n";
+            for (int i = 0; i < size; i++) {
+                theList.insert(i, rand.random_integer(1, 100));
+            }
+        }
+
         switch (target) {
             case 1:
                 sequentialSearch(theList,key);

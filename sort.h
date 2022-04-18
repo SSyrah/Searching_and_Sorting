@@ -22,7 +22,7 @@ public:
     Error_code selectionSort(SortableList<Record>&);
 private:
     int max_key(SortableList<Record>& ,int, int);
-    void swap(SortableList<Record>& sList, int low, int high);
+    void swap(SortableList<Record>& , int low, int high);
 
 };
 
@@ -77,7 +77,7 @@ int SortableList<Record>::getComparisons() const {
 }
 
 template<typename Record>
-Error_code SortableList<Record>::binary_search_1 (const SortableList<Record> &the_list,
+Error_code SortableList<Record>::binary_search_1(const SortableList<Record> &the_list,
                             const Key &target, int &position)
 /*
 Post: If a Record in the_list  has Key equal to target, then position locates
@@ -92,7 +92,7 @@ Uses: Methods for classes List and Record.
     while (bottom < top) {
         int mid = (bottom + top) / 2;
         the_list.retrieve(mid, data);
-        if (data < target)
+        if (operator<(data , target))
             bottom = mid + 1;
         else
             top = mid;
@@ -101,7 +101,7 @@ Uses: Methods for classes List and Record.
     else {
         position = bottom;
         the_list.retrieve(bottom, data);
-        if (data == target) return success;
+        if (operator==(data , target)) return success;
         else return not_present;
     }
 }
@@ -142,8 +142,8 @@ Uses: max_key, swap.
 */
 {
     for (int position = sList.count - 1; position > 0; position--) {
-        int max = sList.max_key(0, position);
-        swap(max, position);
+        int max = max_key(sList,0, position);
+        swap(sList,max, position);
     }
     return success;
 }
@@ -202,6 +202,8 @@ void sequentialSearch(SortableList<Record> &sList, const Key& key) {
         std::cout << "Comparisons: " << sList.getComparisons() << std::endl;
         std::cout << "Elapsed time: " << elapsed.count() << std::endl;
     }
+    std::cout << "\n\n";
+    Key::comparisons = 0;
 }
 
 template<typename Record>
@@ -221,6 +223,8 @@ void binary_search(SortableList<Record>&sList, const Key& key) {
         std::cout << "Comparisons: " << sList.getComparisons() << std::endl;
         std::cout << "Elapsed time: " << elapsed.count() << std::endl;
     }
+    std::cout << "\n\n";
+    Key::comparisons = 0;
 }
 
 template<typename Record>
