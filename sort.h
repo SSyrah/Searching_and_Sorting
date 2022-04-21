@@ -212,6 +212,7 @@ Uses: The contiguous List implementation of Chapter 6, recursive_quick_sort.
     std::cout << "Comparisons: " << sList.getComparisons() << std::endl;
     std::cout << "Elapsed time: " << elapsed.count() << std::endl;
     Key::comparisons = 0;
+    elapsed.zero();
 }
 
 template <typename Record>
@@ -297,6 +298,7 @@ void sequentialSearch(SortableList<Record> &sList, const Key& key) {
     }
     std::cout << "\n\n";
     Key::comparisons = 0;
+    elapsed.zero();
 }
 
 template<typename Record>
@@ -318,6 +320,7 @@ void binary_search(SortableList<Record>&sList, const Key& key) {
     }
     std::cout << "\n\n";
     Key::comparisons = 0;
+    elapsed.zero();
 }
 
 template<typename Record>
@@ -353,7 +356,9 @@ void insertion_sort(SortableList<Record>& sList, int size)
             std::cout << temp << " ";
         }
         std::cout << "\nElapsed time: " << elapsed.count() << std::endl;
-        std::cout << "\n\n";
+        std::cout << "\n";
+        elapsed.zero();
+        Key::comparisons = 0;
     }
     else{
         std::cout << "Entered list size is too low or too high\n";
@@ -391,11 +396,15 @@ void selection_sort(SortableList<Record>& sList, int size)
             std::cout << temp << " ";
         }
         std::cout << "\nElapsed time: " << elapsed.count() << std::endl;
-        std::cout << "\n\n";
+        std::cout << "\n";
+        Key::comparisons = 0;
+        elapsed.zero();
+
     }
     else{
         std::cout << "Entered list size is too low or too high\n";
     }
+
 }
 
 template<typename Record>
@@ -404,12 +413,13 @@ void performance_test(SortableList<Record>& sList)
     SortableList<Record> templist, templist2;
     copy(templist, sList);
     copy(templist2,sList);
+    for (int i = 0; i < 5; i++){
     sList.quick_sort(sList);
     auto begin = std::chrono::steady_clock::now();
     templist.insertion_sort(templist);
     auto end = std::chrono::steady_clock::now();
     auto elapsed = end - begin;
-    std::cout << "\nInsertion sort completed.\n";
+    std::cout << "Insertion sort completed.\n";
     std::cout << "Comparisons: " << templist.getComparisons() << std::endl;
     std::cout << "Elapsed time: " << elapsed.count() << std::endl;
     Key::comparisons = 0;
@@ -417,8 +427,10 @@ void performance_test(SortableList<Record>& sList)
     templist2.selectionSort(templist2);
     auto end2 = std::chrono::steady_clock::now();
     auto elapsed2 = end - begin;
-    std::cout << "\nSelection sort completed.\n";
+    std::cout << "Selection sort completed.\n";
     std::cout << "Comparisons: " << templist2.getComparisons() << std::endl;
     std::cout << "Elapsed time: " << elapsed2.count() << "\n\n";
     Key::comparisons = 0;
+    elapsed.zero(), elapsed2.zero();
+    }
 }
